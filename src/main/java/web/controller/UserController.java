@@ -5,23 +5,19 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
-import web.dao.UserDao;
 import web.model.User;
 import web.service.UserService;
-
-import javax.jws.WebParam;
 
 @Controller
 public class UserController {
     private final UserService userService;
-    private UserDao userDao;
 
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
-    @GetMapping(value = "/")
+    @GetMapping(value = "/users")
     public String printUser(ModelMap modelMap){
         modelMap.addAttribute("users", userService.getAllUsers());
         return "users";

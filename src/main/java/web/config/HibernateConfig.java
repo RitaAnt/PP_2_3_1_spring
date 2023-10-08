@@ -1,7 +1,6 @@
 package web.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -44,7 +43,7 @@ public class HibernateConfig {
 
             return properties;
         } catch (IOException e) {
-            throw new IllegalArgumentException("Не можем найти проперти файл", e);
+            throw new IllegalArgumentException("Not found properties file", e);
         }
     }
 
