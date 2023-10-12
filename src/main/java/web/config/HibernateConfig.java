@@ -7,28 +7,24 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import web.model.User;
 
 import javax.sql.DataSource;
 import java.util.Properties;
 
-
 @Configuration
-@PropertySource("classpath:db.properties")
+@PropertySource(value = "classpath:db.properties")
 @EnableTransactionManagement
 @ComponentScan(value = "web")
 public class HibernateConfig {
 
-    private final Environment env;
 
     @Autowired
-    public HibernateConfig(Environment env) {
-        this.env = env;
-    }
-
+    private Environment env;
 
     @Bean
     public DataSource getDataSource() {
@@ -40,27 +36,26 @@ public class HibernateConfig {
         return dataSource;
     }
 
+
     @Bean
-    public LocalSessionFactoryBean getSessionFactory() {
-        LocalSessionFactoryBean factoryBean = new LocalSessionFactoryBean();
-        factoryBean.setDataSource(getDataSource());
-
-        Properties properties = new Properties();
-        properties.put("hibernate.show_sql", env.getProperty("hibernate.show_sql")); //это мапа, поэтому помещаем в формате ключ-значение
-        properties.put("hibernate.hbm2ddl.auto", env.getProperty("hibernate.hbm2ddl.auto"));
-        properties.put("hibernate.dialect", env.getProperty("hibernate.dialect"));
-
-        factoryBean.setHibernateProperties(properties);
-        factoryBean.setAnnotatedClasses(User.class);
-        return factoryBean;
+    public LocalContainerEntityManagerFactoryBean getEntityManagerFactoryBean() {
+        LocalContainerEntityManagerFactoryBean entityManager = new LocalContainerEntityManagerFactoryBean();
+        entityManager.setDataSource(getDataSource());
+        entityManager.setPackagesToScan(env.getProperty("db.model"));
+        entityManager.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+        Properties props = new Properties();
+        props.put("hibernate.dialect", env.getProperty("hibernate.dialect"));
+        props.put("hibernate.show_sql", env.getProperty("hibernate.show_sql"));
+        props.put("hibernate.hbm2ddl.auto", env.getProperty("hibernate.hbm2ddl.auto"));
+        entityManager.setJpaProperties(props);
+        return entityManager;
     }
 
-    //HibernateTransactionManager автоматически открывает транзакцию Hibernate
+
     @Bean
-    public HibernateTransactionManager getTransactionManager() {
-        HibernateTransactionManager transactionManager = new HibernateTransactionManager();
-        transactionManager.setSessionFactory(getSessionFactory().getObject());
+    public PlatformTransactionManager getTransactionManager() {
+        JpaTransactionManager transactionManager = new JpaTransactionManager();
+        transactionManager.setEntityManagerFactory(getEntityManagerFactoryBean().getObject());
         return transactionManager;
     }
-
 }
