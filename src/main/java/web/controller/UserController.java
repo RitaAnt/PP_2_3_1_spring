@@ -1,62 +1,59 @@
 package web.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import web.model.User;
 import web.service.UserService;
 
 @Controller
+@RequestMapping
 public class UserController {
+
+
     private final UserService userService;
 
-    @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
-    @GetMapping(value = "/users")
-    public String printUser(ModelMap modelMap){
-        modelMap.addAttribute("users", userService.getAllUsers());
-        return "users";
+    @GetMapping(value = "/")
+    public String getIndex(ModelMap model) {
+        model.addAttribute("users", userService.getAllUsers());
+        return "index";
     }
 
-    @GetMapping("/new")
-    public String newUser(Model model){
-        User user = new User();
-        model.addAttribute("user", user);
-        return "new";
+    @GetMapping(value = "/add")
+    public String addForm(ModelMap model) {
+        model.addAttribute("users", new User());
+        return "add";
     }
 
-    @PostMapping("/createUser")
-    public String createUser(@ModelAttribute("user") User user){
+    @PostMapping(value = "/add")
+    public String addSumbit(@ModelAttribute User user) {
         userService.addUser(user);
         return "redirect:/";
     }
-    @GetMapping("/{id}")
-    public String show(@PathVariable("id") int id, Model model) {
-        model.addAttribute("user", userService.show(id));
-        return "show";
-    }
 
-    @GetMapping("/{id}/edit")
-    public String edit(Model model, @PathVariable("id") int id){
-        model.addAttribute("user", userService.show(id));
-        return "edit";
-    }
-
-    @PatchMapping("/{id}")
-    public String update(@ModelAttribute("user") User user, @PathVariable("id") int id) {
-        userService.update(id, user);
+    @PostMapping(value = "/delete")
+    public String deleteUser(@RequestParam("id") Long id) {
+        userService.deleteUserById(id);
         return "redirect:/";
     }
 
-    @DeleteMapping("/{id}")
-    public String delete(@PathVariable("id") int id){
-        userService.delete(id);
-        return "redirect:/";
+    @GetMapping(value = "/edit")
+    public String editPage(@RequestParam("id") Long id, ModelMap model) {
+        model.addAttribute("user", userService.getUserById(id));
+        return "add";
     }
 
+    @PostMapping(value = "/edit")
+    public String editSubmit(@ModelAttribute User user) {
+        userService.updateUser(user);
+        return "redirect:/";
+    }
 }
