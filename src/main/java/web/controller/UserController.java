@@ -2,11 +2,7 @@ package web.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import web.model.User;
 import web.service.UserService;
 
@@ -48,10 +44,10 @@ public class UserController {
     @GetMapping(value = "/edit")
     public String editPage(@RequestParam("id") Long id, ModelMap model) {
         model.addAttribute("user", userService.getUserById(id));
-        return "add";
+        return "edit";
     }
 
-    @PostMapping(value = "/edit")
+    @PatchMapping(value = "/edit")
     public String editSubmit(@ModelAttribute User user) {
         userService.updateUser(user);
         return "redirect:/";
